@@ -126,7 +126,8 @@ class BaseLightningModule(pl.LightningModule):
             self.hparams.batch_size
 
         shuffles = {'train': self.samplers['train'] is None, 'val': self.samplers['val'] is None, 'test': False}
-
+        ## NOTE: each dataloader is seperate for train, val and test, therefore I think no issue with this 
+        # True for shuffeling, no?
         dataloader = DataLoader(self.datasets[split],
                                 batch_size=batch_size,
                                 shuffle=shuffles[split],

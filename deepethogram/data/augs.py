@@ -143,7 +143,8 @@ class UnstackClip(nn.Module):
 
         return torch.stack(torch.chunk(tensor, T, dim=1), dim=2)
 
-
+# NOTE: why there are transforms for CPU and GPU seperatly ?  
+# may be because the module K (kornia).augmentation is just for GPU
 def get_cpu_transforms(augs: DictConfig) -> dict:
     """Makes CPU augmentations from the aug section of a configuration. 
 

@@ -6,7 +6,7 @@ import sys
 import warnings
 from datetime import datetime
 from typing import Union
-
+import torch 
 import h5py
 import numpy as np
 import pandas as pd
@@ -83,11 +83,22 @@ def initialize_project(directory: Union[str, os.PathLike],
 
     fname = os.path.join(project_dir, 'project_config.yaml')
     project_config['project']['config_file'] = fname
-    project_config['project']['data_path'] = project_dir + '\DATA'
-    project_config['project']['model_path'] = project_dir + '\models'
-    project_config['project']['pretrained_path'] = project_dir + '\models\pretrained_models'
+    project_config['project']['data_path'] = os.path.join(project_dir , 'DATA')
+    project_config['project']['model_path'] = os.path.join(project_dir , 'models')
+    project_config['project']['pretrained_path'] = os.path.join(project_dir, 'models', 'pretrained_models')
     utils.save_dict_to_yaml(project_config, fname)
     #print('------------> show this!', flush=True)
+    # handle parallel GPUs 
+    # NOTE: this should be appropriate to the num of GPUs
+    if torch.cuda.is_available():
+        num_gpus = torch.cuda.device_count()
+        if num_gpus > 1:
+            #gpus =[gpu for gpu in range(num_gpus)]
+            #project_config['compute']['gpu_id'] = gpus
+            project_config['compute']['gpu_id'] = 0
+        else:
+            project_config['compute']['gpu_id'] = 0
+        
     return project_config
 
 

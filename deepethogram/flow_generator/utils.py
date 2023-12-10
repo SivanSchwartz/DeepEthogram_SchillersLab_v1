@@ -277,7 +277,10 @@ class Resample2d(torch.nn.Module):
 
 class Reconstructor:
     def __init__(self, cfg: DictConfig):
-        device = torch.device("cuda:" + str(cfg.compute.gpu_id) if torch.cuda.is_available() else "cpu")
+        #device = torch.device("cuda:" + str(cfg.compute.gpu_id) if torch.cuda.is_available() else "cpu")
+        device = cfg['compute']['gpu_id']
+        print('--------------------------->This is the device being used, FG: ')
+        print(str(device))
         self.resampler = Resample2d(device=device, fp16=cfg.compute.fp16)
         if 'normalization' in list(cfg.augs.keys()):
             mean = list(cfg.augs.normalization.mean)

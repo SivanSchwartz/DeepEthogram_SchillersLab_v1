@@ -69,8 +69,20 @@ def flow_generator_train(cfg: DictConfig) -> nn.Module:
     flow_weights = deepethogram.projects.get_weightfile_from_cfg(cfg, 'flow_generator')
     if flow_weights is not None:
         print('reloading weights...')
-        device = torch.device("cuda:" + str(cfg.compute.gpu_id) if torch.cuda.is_available() else "cpu") # 'cpu'
-        flow_generator = utils.load_weights(flow_generator, flow_weights, device=device)
+        if cfg['compute']['distributed']:
+            print('-------------------------> THIS IS THE train.py GF device: ')
+            print(str(cfg['compute']['distributed']))
+            device = torch.device('cuda:0')
+            flow_generator = utils.load_weights(flow_generator, flow_weights, device=device)
+            # lets do some rap..
+            device_ = cfg['compute']['gpu_id']
+            #device = ','.join(map(str, device_))
+            # NOTE: pay attention to change it 
+            flow_generator = nn.DataParallel(flow_generator)
+        # original version 
+        else:
+            device = torch.device("cuda:" + str(cfg.compute.gpu_id) if torch.cuda.is_available() else "cpu") # 'cpu'
+            flow_generator = utils.load_weights(flow_generator, flow_weights, device=device)
 
     stopper = get_stopper(cfg)
     metrics = get_metrics(cfg, os.getcwd(), utils.get_num_parameters(flow_generator))
@@ -143,6 +155,7 @@ class OpticalFlowLightning(BaseLightningModule):
                 batch['labels'] = batch['labels'].unsqueeze(0)
         return batch
 
+    # The forwrd pass
     def common_step(self, batch: dict, batch_idx: int, split: str):
         """forward pass, image reconstruction, and loss computation
 

@@ -28,7 +28,7 @@ def CheckCsvExist(vids):
 def copyFiles(paths, dst):
     for path in paths:
         # copy the csv
-        csv_path = ''.join(glob.glob(path + '\*.csv'))
+        csv_path = ''.join(glob.glob(path + '\*_labels.csv')) # do not copy predictions 
         vid_path = ''.join(glob.glob(path + '\*.mp4'))
         if csv_path != '':
             dest_path_csv = dst + '\\' + nameChange(csv_path, '.csv')
@@ -58,8 +58,10 @@ def csvData2listtrails(csv_file):
             # animal_name = session.split('\\')[-3] if 'CT' in session.split('\\')[-3] else session.split('\\')[-2]
             # session_project = '_'.join(session.split('\\')[-1].split(' ')) + '_deepethogram'
             # session_project = animal_name + '_' + session_project
-            
-            current_paths = glob.glob(session +'\\*deepethogram\\DATA\*')
+            print(session)
+            if session == r'\\192.114.20.62\e\Maisan (Jackie-C-Analys)\2ph Experiments\Videos\CT93\fixed videos\23_04_14 HR tuft control':
+                print('stop')
+            current_paths = glob.glob(session +'\\*_deepethogram\\DATA\*')
             paths.append(current_paths)
     paths = list(chain(*paths))
     return paths
@@ -67,8 +69,8 @@ def csvData2listtrails(csv_file):
 
 
 def main():
-    csv_file = 'H:\\Models_deepEthogram\\add_data.xlsx'
-    dst = 'H:\deepethogram\dataset'
+    csv_file = 'H:\\deepethogram\\deepethogram_sivan_26_11.xlsx'
+    dst = 'H:\deepethogram\dataset_26_11'
     paths = csvData2listtrails(csv_file)
     copyFiles(paths, dst)
     

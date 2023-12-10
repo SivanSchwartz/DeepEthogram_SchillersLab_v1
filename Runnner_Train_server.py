@@ -21,23 +21,26 @@ from deepethogram.postprocessing import postprocess_and_save
 from deepethogram.configuration import make_postprocessing_cfg
 from deepethogram.flow_generator.inference import make_feature_extractor_inference_cfg, flow_generator_inference
 
+
+import argparse
+
 class Train():
-    def __init__(self, class_list, labeled_data_path, save_proj_path,
+    def __init__(self, args, class_list, save_proj_path,
                  backboneWeightspath):
-        self.vids_list = glob.glob(labeled_data_path + '\\**\\*.mp4',
+        self.vids_list = glob.glob(args.labeled_data_path + '/**/*.mp4',
                                    recursive=True)
-        self.csv_list = glob.glob(labeled_data_path + '\\**\\*.csv',
+        self.csv_list = glob.glob(args.labeled_data_path + '/**/*.csv',
                                    recursive=True)        
         self.class_list = class_list
         self.save_projects_path = save_proj_path
         self.backboneWeightspath = backboneWeightspath
-    
+        self.exp_name = args.exp_name
+        self.args = args
     
     def CopyModelsBackbone(self):
         try:
-            #src = 'H:\Models_deepEthogram\MODELS_BACKBONE\pretrained_models'
-            src = self.backboneWeightspath
-            dst = self.project_config['project']['path'] + '\models\pretrained_models'
+            src = '/home/sivan.s/DeepEthogramProject/deepethogram/MODELS_BACKBONE/pretrained_models'
+            dst = self.project_config['project']['path'] + '/models/pretrained_models'
             shutil.copytree(src, dst)
             print("Directory backbone pretrained models copied successfully!")
         except shutil.Error as e:
@@ -50,7 +53,7 @@ class Train():
         # time getter 
         current_datetime = datetime.datetime.now()
         date_time_string = current_datetime.strftime("%Y_%m_%d_%H_%M_%S")
-        return 'Exp_'+date_time_string
+        return 'Exp_'+ self.exp_name + '_' + date_time_string
     
     def creatnewproject(self,project_name):
     # this will create a folder called /mnt/DATA/open_field_deepethogram
@@ -76,7 +79,12 @@ class Train():
         # change path to vids to be the new one 
         vids_project = self.project_config['project']['path'] + '/DATA/*/*.mp4'
         list_of_movies_updated = glob.glob(vids_project)
-
+        
+        # sort by name 
+        vids_sorted = sorted(list_of_movies_updated, key=lambda x: os.path.basename(x).split('.')[0])
+        cvs_sorted = sorted(csvs, key=lambda x: os.path.basename(x).split('.')[0])  
+        
+        # adds csv files to the dir of the vid, and adds '_labels' if not exist
         for movie_path, label_path in zip(list_of_movies_updated, csvs):
             projects.add_label_to_project(label_path, movie_path)
 
@@ -112,9 +120,15 @@ class Train():
         n_cpus = multiprocessing.cpu_count()
         print('n cpus: {}'.format(n_cpus))
         cfg.compute.num_workers = n_cpus # was n_cpus var
-        cfg.train.num_epochs = 2 # lets see if changes from 10 THIS IS THE WAY TO CHANGE 
-        print('---------------------------------------------------< THIS IS THE INSERTED CONFIGURATIONS')
-        print(OmegaConf.to_yaml(cfg))
+        
+        # lets change the hyper params 
+        cfg.train.num_epochs = self.args.num_epochs_FG
+        cfg.flow_generator.arch = self.args.arch_FG
+        cfg.flow_generator.flow_max = self.args.flow_max_FG
+        
+        cfg.flow_generator.input_images = self.args.flow_max_FG + 1 # it depends on the previus 
+        cfg.flow_generator.n_rgb = self.args.flow_max_FG + 1
+        
         flow_generator = flow_generator_train(cfg)
         
     def reset_logger(self):
@@ -140,8 +154,13 @@ class Train():
         cfg.flow_generator.weights = 'latest'
         n_cpus = multiprocessing.cpu_count()
         cfg.compute.num_workers = n_cpus
-
         log = self.reset_logger()
+        
+        cfg.feature_extractor.arch = self.args.arch_FE
+        cfg.feature_extractor.n_flows = self.args.flow_max_FG # should be as flow generation 
+        cfg.feature_extractor.curriculum = self.args.curriculum_FE
+        cfg.train.num_epochs = self.args.num_epochs_FE
+        
         feature_extractor = feature_extractor_train(cfg)
 
 
@@ -164,6 +183,12 @@ class Train():
         preset = 'deg_f'
         cfg = trainseq.make_sequence_train_cfg(self.project_path,
                                                use_command_line=True)
+        
+        
+        cfg.train.num_epochs = self.args.num_epochs_S
+        cfg.sequence.rnn_style = self.args.rnn_style_S
+        
+        
         trainseq.sequence_train(cfg)
  
     # INFERENCE SEQUENCE MODEL
@@ -183,33 +208,33 @@ class Train():
         postprocess_and_save(cfg)
    
 
-def main(class_list, 
-        labeled_data_path,
-        save_proj_path,
-        backboneWeightspath):
+def main():
     
-    # create object 
-    trainer = Train(class_list, 
-                    labeled_data_path,
-                    save_proj_path,
-                    backboneWeightspath)
+    parser = argparse.ArgumentParser(description='get inputs from the user for hyperparm etc.')
     
+    # arguments from the user
+    parser.add_argument('--labeled_data_path', type=str, default= '/home/sivan.s/DeepEthogramProject/deepethogram/dataset',
+                        help='the path to the data')
+    parser.add_argument('--exp_name', type=str, default= '', help='the name to add to the experiment')
+    
+    # Flow generator parameters 
+    parser.add_argument('--num_epochs_FG', type=int, default= 10, help='the num of epochs')
+    parser.add_argument('--flow_max_FG', type=int, default= 10, help='the num of frames') # the input_images should be this +1 and also n_rgb
+    parser.add_argument('--arch_FG', type=str, default= 'TinyMotionNet', 
+                        help = 'Could also be TinyMotionNet, MotionNet, TinyMotionNet3d')
+    
+    # Feature extractor parameters
+    parser.add_argument('--num_epochs_FE', type=int, default= 20, help='the num of epochs')
+    parser.add_argument('--arch_FE', type=str, default= 'resnet18', help='the arch of FE, could be resnet18, resnet50, resnet3d_34')
+    parser.add_argument('--curriculum_FE', type=bool, default= False, 
+                        help='if true, first trains the spatial CNN, then the flow CNN, and finally the two jointly end-to-end')
+    
+    # sequence parameters 
+    parser.add_argument('--num_epochs_S', type=int, default= 100, help='the num of epochs')
+    parser.add_argument('--rnn_style_S', type=str, default= 'lstm', help='can be from these options: rnn, gru, lstm')
+    
+    args = parser.parse_args()
 
-    
-    
-    
-    trainer.initialization()
-    trainer.train_flow_generation()
-    trainer.tain_feature_extractor()
-    trainer.inference_feature_extractor()
-    trainer.train_sequence()
-    trainer.inference_sequence()
-    trainer.postprocessing()
-    
-    
-
-if __name__ == '__main__':
-    
     # inputs from user 
     class_list = ['background', 
             'Perch', 
@@ -223,14 +248,12 @@ if __name__ == '__main__':
             'BackPerch',
             'Table']
     
-    labeled_data_path = r'C:\Users\Jackie.MEDICINE\Desktop\New folder'
-    save_proj_path = r'H:\Models_deepEthogram' 
-    backboneWeightspath = r'H:\Models_deepEthogram\MODELS_BACKBONE\pretrained_models'
-    
+    save_proj_path = '/home/sivan.s/DeepEthogramProject/deepethogram/Models_deepEthogram/'
+    backboneWeightspath = '/home/sivan.s/DeepEthogramProject/deepethogram/MODELS_BACKBONE/pretrained_models'
     
     # create object 
-    trainer = Train(class_list, 
-                    labeled_data_path,
+    trainer = Train(args, 
+                    class_list, 
                     save_proj_path,
                     backboneWeightspath)
     
@@ -240,4 +263,7 @@ if __name__ == '__main__':
     trainer.inference_feature_extractor()
     trainer.train_sequence()
     trainer.inference_sequence()
-    trainer.postprocessing()
+    trainer.postprocessing()    
+
+if __name__ == '__main__':
+    main()

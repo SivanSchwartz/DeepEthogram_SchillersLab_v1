@@ -1,4 +1,5 @@
 import logging
+import datetime
 import multiprocessing
 import os
 import random
@@ -32,8 +33,16 @@ def addDataTrain(project_config, vid_path, csv_path):
     # change path to vids to be the new one 
     vids_project = project_config['project']['path'] + '/DATA/*/*.mp4'
     list_of_movies_updated = glob.glob(vids_project)
-
-    for movie_path, label_path in zip(list_of_movies_updated, csvs):
+    #print('--------> This is the list of movies: ' + list_of_movies_updated)
+    #print('--------> This is the list of labels: ' + csvs)
+    
+    
+    vids_sorted = sorted(list_of_movies_updated, key=lambda x: os.path.basename(x).split('.')[0])
+    cvs_sorted = sorted(csvs, key=lambda x: os.path.basename(x).split('.')[0])   
+    
+    
+    for movie_path, label_path in zip(vids_sorted, cvs_sorted):
+        print('copy- ' + movie_path + ' -with- ' + label_path)
         projects.add_label_to_project(label_path, movie_path)
 
 def reset_logger():
@@ -67,32 +76,39 @@ def creatnewproject(data_path, project_name, behaviors):
     copyModels(project_config)
     return project_config
 
+
+def gettimestr():
+    current_datetime = datetime.datetime.now()
+    date_time_string = current_datetime.strftime("%Y_%m_%d_%H_%M_%S")
+    return 'Exp_'+date_time_string
+
 if __name__ == '__main__':
-    project_path = r'/home/sivan.s/DeepEthogramProject/deepethogram/Models_deepEthogram/try100_deepethogram' # This is path example in my local machine 
-    # # these are the real labels you have in the dataset 
-    # behaviors = ['background', 
-    #         'Perch', 
-    #         'Lift', 
-    #         'Reach', 
-    #         'Grab_nonPellet',
-    #         'Grab',
-    #         'Sup',
-    #         'AtMouth',
-    #         'AtMouth_nonPellet',
-    #         'BackPerch',
-    #         'Table']
+    project_path = r'/home/sivan.s/DeepEthogramProject/deepethogram/Models_deepEthogram/' # This is path example in my local machine 
+    # these are the real labels you have in the dataset 
+    behaviors = ['background', 
+            'Perch', 
+            'Lift', 
+            'Reach', 
+            'Grab_nonPellet',
+            'Grab',
+            'Sup',
+            'AtMouth',
+            'AtMouth_nonPellet',
+            'BackPerch',
+            'Table']
 
-    # # give name to the project (folder will be created with this name + '_deepethogram')
-    # project_name = 'Exp1'
-    # project_config = creatnewproject(project_path, project_name, behaviors)
+    # give name to the project (folder will be created with this name + '_deepethogram')
+    
+    project_name = gettimestr()
+    project_config = creatnewproject(project_path, project_name, behaviors)
 
-    # # Paths to the data you want to train on, just example here, change to your paths 
-    # vid_path = r'/home/sivan.s/DeepEthogramProject/deepethogram/dataset/*.mp4'
-    # csv_path = r'/home/sivan.s/DeepEthogramProject/deepethogram/dataset/*.csv'
-    # addDataTrain(project_config, vid_path, csv_path)
+    # Paths to the data you want to train on, just example here, change to your paths 
+    vid_path = r'/home/sivan.s/DeepEthogramProject/deepethogram/dataset/*.mp4'
+    csv_path = r'/home/sivan.s/DeepEthogramProject/deepethogram/dataset/*.csv'
+    addDataTrain(project_config, vid_path, csv_path)
     
     # stage 0: check dirs for project and initializations
-    #project_path = project_config['project']['path'] # updated 
+    project_path = project_config['project']['path'] # updated 
     files = os.listdir(project_path)
     assert 'DATA' in files, 'DATA directory not found! {}'.format(files)
     assert 'models' in files, 'models directory not found! {}'.format(files)
@@ -113,7 +129,53 @@ if __name__ == '__main__':
     print(OmegaConf.to_yaml(cfg))
     n_cpus = multiprocessing.cpu_count()
     print('n cpus: {}'.format(n_cpus))
-    cfg.compute.num_workers = n_cpus
+    cfg.compute.num_workers = 2
     flow_generator = flow_generator_train(cfg)
+
+    # stage 2: feature extractor training
+    preset = 'deg_f' # type of model -> deg_f, deg_m, deg_s
+    cfg = configuration.make_feature_extractor_train_cfg(project_path, preset=preset)
+    print(OmegaConf.to_yaml(cfg))
+    # the latest string will find the most recent model by date
+    # you can also pass a specific .pt or .ckpt file here
+    cfg.flow_generator.weights = 'latest'
+    n_cpus = multiprocessing.cpu_count()
+    cfg.compute.num_workers = n_cpus
+
+    log = reset_logger()
+    feature_extractor = feature_extractor_train(cfg)
+    
+    
+    # stage 2: feature extractor inference 
+    preset = 'deg_f'
+    cfg = configuration.make_feature_extractor_inference_cfg(project_path=project_path, preset=preset)
+    print(OmegaConf.to_yaml(cfg))
+
+    cfg.feature_extractor.weights = 'latest' 
+    cfg.flow_generator.weights = 'latest' # do not change since it is adopted to the specific training 
+    cfg.inference.overwrite = True
+    # make sure errors are thrown
+    cfg.inference.ignore_error = False
+    cfg.compute.num_workers = 2
+    feature_extractor_inference(cfg)
+
+    # stage 3: seq training 
+    preset = 'deg_f'
+    cfg = trainseq.make_sequence_train_cfg(project_path, use_command_line=True)
+    trainseq.sequence_train(cfg)
+
+    # stage 3: seq inference 
+    preset = 'deg_f'
+    cfg = configuration.make_sequence_inference_cfg(project_path)
+    cfg.sequence.weights = 'latest'
+    n_cpus = multiprocessing.cpu_count()
+    cfg.compute.num_workers = 2
+    cfg.inference.overwrite = True
+    cfg.inference.ignore_error = False
+    sequence_inference(cfg)
+    
+    # load cfg and save all predictions 
+    cfg = make_postprocessing_cfg(project_path)
+    postprocess_and_save(cfg)
 
 

@@ -4,7 +4,7 @@ augs:
   brightness: 0.25
   contrast: 0.1
   crop_size: null
-  degrees: 10
+  degrees: 30
   hue: 0.1
   saturation: 0.1
   grayscale: 0.5
@@ -22,7 +22,7 @@ augs:
   random_resize: false
   resize:
   - 224
-  - 224
+  - 450
 compute:
   batch_size: 32
   distributed: false
