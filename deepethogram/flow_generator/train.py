@@ -10,6 +10,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from omegaconf import DictConfig, OmegaConf
+from torch.nn.parallel import DistributedDataParallel as DDP 
 
 import deepethogram.projects
 from deepethogram import utils, viz, projects
@@ -37,7 +38,7 @@ plt.switch_backend('agg')
 log = logging.getLogger(__name__)
 
 
-def flow_generator_train(cfg: DictConfig) -> nn.Module:
+def flow_generator_train(cfg: DictConfig, gpu_id: int) -> nn.Module:
     """Trains flow generator models from a configuration. 
 
     Parameters
@@ -68,25 +69,12 @@ def flow_generator_train(cfg: DictConfig) -> nn.Module:
     utils.save_dict_to_yaml(data_info['split'], os.path.join(os.getcwd(), 'split.yaml'))
     flow_weights = deepethogram.projects.get_weightfile_from_cfg(cfg, 'flow_generator')
     if flow_weights is not None:
-        print('reloading weights...')
-        if cfg['compute']['distributed']:
-            print('-------------------------> THIS IS THE train.py GF device: ')
-            print(str(cfg['compute']['distributed']))
-            device = torch.device('cuda:0')
-            flow_generator = utils.load_weights(flow_generator, flow_weights, device=device)
-            # lets do some rap..
-            device_ = cfg['compute']['gpu_id']
-            #device = ','.join(map(str, device_))
-            # NOTE: pay attention to change it 
-            flow_generator = nn.DataParallel(flow_generator)
-        # original version 
-        else:
-            device = torch.device("cuda:" + str(cfg.compute.gpu_id) if torch.cuda.is_available() else "cpu") # 'cpu'
-            flow_generator = utils.load_weights(flow_generator, flow_weights, device=device)
-
+        device = torch.device("cuda:0") # 'cpu'
+        flow_generator = utils.load_weights(flow_generator, flow_weights, device=device)
+            
     stopper = get_stopper(cfg)
     metrics = get_metrics(cfg, os.getcwd(), utils.get_num_parameters(flow_generator))
-    lightning_module = OpticalFlowLightning(flow_generator, cfg, datasets, metrics, viz.visualize_logger_optical_flow) # CPU!!!!!! why!?!?! TODO
+    lightning_module = OpticalFlowLightning(flow_generator, cfg, datasets, metrics, viz.visualize_logger_optical_flow)
 
     trainer = get_trainer_from_cfg(cfg, lightning_module, stopper)
     trainer.fit(lightning_module)

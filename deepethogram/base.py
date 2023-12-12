@@ -276,7 +276,8 @@ def get_trainer_from_cfg(cfg: DictConfig, lightning_module, stopper, profiler: s
     # learning rate schedule.
 
     if cfg.compute.batch_size == 'auto' or cfg.train.lr == 'auto':
-        trainer = pl.Trainer(gpus=[cfg.compute.gpu_id],
+        trainer = pl.Trainer(gpus=-1,
+                             distributed_backend = 'ddp',
                              precision=16 if cfg.compute.fp16 else 32,
                              limit_train_batches=1.0,
                              limit_val_batches=1.0,
