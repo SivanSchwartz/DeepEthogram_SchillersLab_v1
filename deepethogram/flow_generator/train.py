@@ -38,7 +38,7 @@ plt.switch_backend('agg')
 log = logging.getLogger(__name__)
 
 
-def flow_generator_train(cfg: DictConfig, gpu_id: int) -> nn.Module:
+def flow_generator_train(cfg: DictConfig) -> nn.Module:
     """Trains flow generator models from a configuration. 
 
     Parameters
