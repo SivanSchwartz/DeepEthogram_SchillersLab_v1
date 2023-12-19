@@ -128,7 +128,7 @@ class Train():
         
         cfg.flow_generator.input_images = self.args.flow_max_FG + 1 # it depends on the previus 
         cfg.flow_generator.n_rgb = self.args.flow_max_FG + 1
-        
+        cfg.compute.batch_size = 16
         flow_generator = flow_generator_train(cfg)
         
     def reset_logger(self):
@@ -160,7 +160,7 @@ class Train():
         cfg.feature_extractor.n_flows = self.args.flow_max_FG # should be as flow generation 
         cfg.feature_extractor.curriculum = self.args.curriculum_FE
         cfg.train.num_epochs = self.args.num_epochs_FE
-        
+        cfg.compute.batch_size = 16
         feature_extractor = feature_extractor_train(cfg)
 
 
@@ -176,6 +176,7 @@ class Train():
         # make sure errors are thrown
         cfg.inference.ignore_error = False
         cfg.compute.num_workers = 2
+        cfg.compute.batch_size = 16
         feature_extractor_inference(cfg)
 
     # TRAIN SEQUENCE 
@@ -188,7 +189,7 @@ class Train():
         cfg.train.num_epochs = self.args.num_epochs_S
         cfg.sequence.rnn_style = self.args.rnn_style_S
         
-        
+        cfg.compute.batch_size = 16
         trainseq.sequence_train(cfg)
  
     # INFERENCE SEQUENCE MODEL
