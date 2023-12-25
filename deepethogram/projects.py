@@ -1448,7 +1448,7 @@ def configure_run_directory(cfg: DictConfig) -> str:
         directory += f'_{cfg.notes}'
     if not os.path.isdir(directory):
         os.makedirs(directory)
-    #os.chdir(directory)
+    os.chdir(directory)
     return directory
 
 
@@ -1501,6 +1501,6 @@ def setup_run(cfg: DictConfig, **kwargs) -> DictConfig:
     directory = configure_run_directory(cfg)
     cfg.run.dir = directory
     configure_logging(cfg)
-
+    
     utils.save_dict_to_yaml(OmegaConf.to_container(cfg), 'config.yaml')
     return cfg
