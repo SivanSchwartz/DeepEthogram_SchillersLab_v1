@@ -70,9 +70,10 @@ def flow_generator_train(cfg: DictConfig) -> nn.Module:
     log.info('Total trainable params: {:,}'.format(utils.get_num_parameters(flow_generator)))
     utils.save_dict_to_yaml(data_info['split'], os.path.join(os.getcwd(), 'split.yaml'))
     flow_weights = deepethogram.projects.get_weightfile_from_cfg(cfg, 'flow_generator')
+    # check if possible without device here 
     if flow_weights is not None:
-        device = torch.device("cuda:0") # 'cpu'
-        flow_generator = utils.load_weights(flow_generator, flow_weights, device=device)
+        #device = torch.device("cuda:0") # 'cpu'
+        flow_generator = utils.load_weights(flow_generator, flow_weights)#, device=device)
             
     stopper = get_stopper(cfg)
     metrics = get_metrics(cfg, os.getcwd(), utils.get_num_parameters(flow_generator))

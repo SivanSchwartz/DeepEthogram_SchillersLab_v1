@@ -86,7 +86,7 @@ def feature_extractor_train(cfg: DictConfig) -> nn.Module:
                                          model_type='feature_extractor',
                                          input_images=cfg.feature_extractor.n_flows + 1)
 
-    model_parts = build_model_from_cfg(cfg, pos=data_info['pos'], neg=data_info['neg'])
+    model_parts = build_model_from_cfg(cfg, pos=data_info['pos'], neg=data_info['neg']) # CPU based, why?
     _, spatial_classifier, flow_classifier, fusion, model = model_parts
     # log.info('model: {}'.format(model))
 
