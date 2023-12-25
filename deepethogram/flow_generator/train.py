@@ -77,6 +77,8 @@ def flow_generator_train(cfg: DictConfig) -> nn.Module:
             
     stopper = get_stopper(cfg)
     metrics = get_metrics(cfg, os.getcwd(), utils.get_num_parameters(flow_generator))
+    print('-------------------------------------------------------------> PATH os.getcwd(): ')
+    print(os.getcwd())
     lightning_module = OpticalFlowLightning(flow_generator, cfg, datasets, metrics, viz.visualize_logger_optical_flow)
 
     trainer = get_trainer_from_cfg(cfg, lightning_module, stopper)
