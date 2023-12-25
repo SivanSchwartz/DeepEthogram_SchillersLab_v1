@@ -1448,7 +1448,7 @@ def configure_run_directory(cfg: DictConfig) -> str:
         directory += f'_{cfg.notes}'
     if not os.path.isdir(directory):
         os.makedirs(directory)
-    os.chdir(directory)
+    #os.chdir(directory)
     return directory
 
 
