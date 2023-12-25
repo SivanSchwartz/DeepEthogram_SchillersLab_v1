@@ -249,7 +249,7 @@ def main():
             'BackPerch',
             'Table']
     
-    save_proj_path = '/home/sivan.s/DeepEthogramProject/deepethogram/Models_deepEthogram/'
+    save_proj_path = '/home/sivan.s/Models_results_deepEto/'
     backboneWeightspath = '/home/sivan.s/DeepEthogramProject/deepethogram/MODELS_BACKBONE/pretrained_models'
     
     # create object 
