@@ -356,7 +356,7 @@ def print_gpus():
     for i in range(n_gpus):
         print('GPU %d %s: Compute Capability %d.%d, Mem:%f' %
               (i, torch.cuda.get_device_name(i), int(torch.cuda.get_device_capability(i)[0]),
-               int(torch.cuda.get_device_capability(i)[1]), torch.cuda.max_memory_allocated(i)))
+               int(torch.cuda.get_device_capability(i)[1]), torch.cuda.max_memory_allocated(i)), flush=True)
 
 
 class Normalizer:

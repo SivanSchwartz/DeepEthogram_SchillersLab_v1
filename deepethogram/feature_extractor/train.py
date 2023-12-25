@@ -30,6 +30,8 @@ from deepethogram.metrics import Classification
 from deepethogram import projects
 from deepethogram.stoppers import get_stopper
 
+from deepethogram.utils import print_gpus
+
 # hack
 # https://github.com/ray-project/ray/issues/10995
 os.environ["SLURM_JOB_NAME"] = "bash"
@@ -152,6 +154,8 @@ def feature_extractor_train(cfg: DictConfig) -> nn.Module:
         lightning_module = HiddenTwoStreamLightning(flow_generator_and_classifier, cfg, datasets, metrics, criterion)
         trainer = get_trainer_from_cfg(cfg, lightning_module, stopper)
         # lightning_module = HiddenTwoStreamLightning(flow_generator_and_classifier, cfg, datasets, metrics, criterion)
+        print('-------------------------------------------------------------> GPUs used before fit function FE:', flush=True)
+        print_gpus()
         trainer.fit(lightning_module)
 
         del datasets, lightning_module, trainer, stopper, data_info
@@ -179,6 +183,8 @@ def feature_extractor_train(cfg: DictConfig) -> nn.Module:
     trainer = get_trainer_from_cfg(cfg, lightning_module, stopper)
     # see above for horrible syntax explanation
     # lightning_module = HiddenTwoStreamLightning(model, cfg, datasets, metrics, criterion)
+    print('-------------------------------------------------------------> GPUs used before fit function FE:', flush=True)
+    print_gpus()
     trainer.fit(lightning_module)
     # trainer.test(model=lightning_module)
     return model

@@ -25,6 +25,8 @@ from deepethogram.losses import get_regularization_loss
 from deepethogram.metrics import OpticalFlow
 from deepethogram.stoppers import get_stopper
 
+from deepethogram.utils import print_gpus
+
 warnings.filterwarnings(
     'ignore',
     category=UserWarning,
@@ -77,6 +79,8 @@ def flow_generator_train(cfg: DictConfig) -> nn.Module:
     lightning_module = OpticalFlowLightning(flow_generator, cfg, datasets, metrics, viz.visualize_logger_optical_flow)
 
     trainer = get_trainer_from_cfg(cfg, lightning_module, stopper)
+    print('-------------------------------------------------------------> GPUs used before fit function:', flush=True)
+    print_gpus()
     trainer.fit(lightning_module)
     return flow_generator
 

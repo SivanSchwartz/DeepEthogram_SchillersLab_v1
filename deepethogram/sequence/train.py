@@ -20,6 +20,7 @@ from deepethogram.schedulers import initialize_scheduler
 from deepethogram.sequence.models.mlp import MLP
 from deepethogram.sequence.models.sequence import Linear, Conv_Nonlinear, RNN
 from deepethogram.sequence.models.tgm import TGM, TGMJ
+from deepethogram.utils import print_gpus
 
 log = logging.getLogger(__name__)
 
@@ -72,6 +73,10 @@ def sequence_train(cfg: DictConfig) -> nn.Module:
     lightning_module = SequenceLightning(model, cfg, datasets, metrics, criterion)
     # change auto batch size parameters because large sequences can overflow RAM
     trainer = get_trainer_from_cfg(cfg, lightning_module, stopper)
+    
+    print('-------------------------------------------------------------> GPUs used before fit function SEQ:', flush=True)
+    print_gpus()
+    
     trainer.fit(lightning_module)
     return model
 
