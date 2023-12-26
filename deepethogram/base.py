@@ -280,7 +280,7 @@ def get_trainer_from_cfg(cfg: DictConfig, lightning_module, stopper, profiler: s
 
     if cfg.compute.batch_size == 'auto' or cfg.train.lr == 'auto':
         trainer = pl.Trainer(accelerator = 'gpu', gpus=-1,
-                             strategy = 'ddp_spawn',
+                             strategy = 'ddp',
                              precision=16,# if cfg.compute.fp16 else 32,
                              limit_train_batches=1.0,
                              limit_val_batches=1.0,
@@ -389,7 +389,7 @@ def get_trainer_from_cfg(cfg: DictConfig, lightning_module, stopper, profiler: s
         # will be deprecated in the future; pytorch lightning updated their kwargs for this function
         # don't like how they keep updating the api without proper deprecation warnings, etc.
         trainer = pl.Trainer(accelerator = 'gpu',gpus=-1,
-                             strategy = 'ddp_spawn',
+                             strategy = 'ddp',
                              precision=16, #if cfg.compute.fp16 else 32,
                              limit_train_batches=steps_per_epoch['train'],
                              limit_val_batches=steps_per_epoch['val'],
@@ -405,7 +405,7 @@ def get_trainer_from_cfg(cfg: DictConfig, lightning_module, stopper, profiler: s
 
     except TypeError:
         trainer = pl.Trainer(accelerator = 'gpu',gpus=-1,
-                             strategy = 'ddp_spawn',
+                             strategy = 'ddp',
                              precision=16,# if cfg.compute.fp16 else 32,
                              limit_train_batches=steps_per_epoch['train'],
                              limit_val_batches=steps_per_epoch['val'],
