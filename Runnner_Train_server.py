@@ -214,7 +214,7 @@ def main():
     parser = argparse.ArgumentParser(description='get inputs from the user for hyperparm etc.')
     
     # arguments from the user
-    parser.add_argument('--labeled_data_path', type=str, default= '/home/sivan.s/DeepEthogramProject/deepethogram/dataset',
+    parser.add_argument('--labeled_data_path', type=str, default= '/home/sivan.s/dataset_28_12',
                         help='the path to the data')
     parser.add_argument('--exp_name', type=str, default= '', help='the name to add to the experiment')
     
