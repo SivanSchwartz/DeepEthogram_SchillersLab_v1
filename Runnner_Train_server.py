@@ -70,7 +70,7 @@ class Train():
     def addDataTrain(self):
         list_of_movies =self.vids_list
         csvs = self.csv_list
-        mode = 'copy' # or 'symlink' or 'move'
+        mode = 'symlink' # or 'copy' 'symlink' or 'move'
         # depending on the mode, it will copy, symlink, or move each video file
         # it will also compute the mean and standard deviation of each RGB channel
         for movie_path in list_of_movies:
