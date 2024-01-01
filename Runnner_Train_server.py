@@ -113,7 +113,7 @@ class Train():
 
     # TRAIN FLOW GENERATOR
     def train_flow_generation(self):
-        preset = 'deg_f' # type of model -> deg_f, deg_m, deg_s
+        preset = 'deg_m' # type of model -> deg_f, deg_m, deg_s
         cfg = configuration.make_flow_generator_train_cfg(self.project_path, preset = preset) 
                                                          
         print(OmegaConf.to_yaml(cfg))
