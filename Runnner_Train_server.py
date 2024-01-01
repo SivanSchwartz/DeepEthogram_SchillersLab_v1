@@ -166,7 +166,7 @@ class Train():
 
     # INFERENCE FEATURE EXTRACTOR 
     def inference_feature_extractor(self):
-        preset = 'deg_s'
+        preset = 'deg_f'
         cfg = configuration.make_feature_extractor_inference_cfg(project_path=self.project_path, preset=preset)
         print(OmegaConf.to_yaml(cfg))
 
