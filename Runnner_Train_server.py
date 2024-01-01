@@ -211,6 +211,9 @@ def main():
     
     parser = argparse.ArgumentParser(description='get inputs from the user for hyperparm etc.')
     
+    # start from other location
+    parser.add_argument('--Exist_path', type = str, default= None, help = 'If the project already exist then take the path to it')
+    
     # arguments from the user
     parser.add_argument('--labeled_data_path', type=str, default= '/home/sivan.s/DeepEthogramProject/deepethogram/small_dataset_deabug/',
                         help='the path to the data')
