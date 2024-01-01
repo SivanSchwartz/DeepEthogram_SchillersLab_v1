@@ -145,7 +145,7 @@ class Train():
     
     # TRAIN FEATURE EXTRACTOR 
     def tain_feature_extractor(self):
-        preset = 'deg_f' # type of model -> deg_f, deg_m, deg_s
+        preset = 'deg_m' # type of model -> deg_f, deg_m, deg_s
         cfg = configuration.make_feature_extractor_train_cfg(self.project_path,
                                                              preset=preset)
         print(OmegaConf.to_yaml(cfg))
@@ -166,7 +166,7 @@ class Train():
 
     # INFERENCE FEATURE EXTRACTOR 
     def inference_feature_extractor(self):
-        preset = 'deg_f'
+        preset = 'deg_m'
         cfg = configuration.make_feature_extractor_inference_cfg(project_path=self.project_path, preset=preset)
         print(OmegaConf.to_yaml(cfg))
 
@@ -181,7 +181,6 @@ class Train():
 
     # TRAIN SEQUENCE 
     def train_sequence(self):
-        preset = 'deg_f'
         cfg = trainseq.make_sequence_train_cfg(self.project_path,
                                                use_command_line=True)
         
@@ -194,7 +193,6 @@ class Train():
  
     # INFERENCE SEQUENCE MODEL
     def inference_sequence(self):
-        preset = 'deg_f'
         cfg = configuration.make_sequence_inference_cfg(self.project_path)
         cfg.sequence.weights = 'latest'
         n_cpus = multiprocessing.cpu_count()
