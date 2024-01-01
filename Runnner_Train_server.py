@@ -85,7 +85,7 @@ class Train():
         cvs_sorted = sorted(csvs, key=lambda x: os.path.basename(x).split('.')[0])  
         
         # adds csv files to the dir of the vid, and adds '_labels' if not exist
-        for movie_path, label_path in zip(list_of_movies_updated, csvs):
+        for movie_path, label_path in zip(vids_sorted, cvs_sorted):
             projects.add_label_to_project(label_path, movie_path)
 
 
