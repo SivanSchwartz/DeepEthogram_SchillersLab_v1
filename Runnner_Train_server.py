@@ -119,7 +119,7 @@ class Train():
         print(OmegaConf.to_yaml(cfg))
         n_cpus = multiprocessing.cpu_count()
         print('n cpus: {}'.format(n_cpus))
-        cfg.compute.num_workers = n_cpus # was n_cpus var
+        cfg.compute.num_workers = 2 # was n_cpus var
         
         # lets change the hyper params 
         cfg.train.num_epochs = self.args.num_epochs_FG
