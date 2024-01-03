@@ -36,8 +36,8 @@ augs:
   #  # actually appear in your training set, set it to 0.5. Example: mouse in an open field looks reasonable flipped
   # upside down. By contrast, an animal walking on a treadmill will never appear upside-down, so it should be set to 0.
   UD: 0.0
-  # The image during training will be randomly rotated +/- the below degrees.
-  degrees: 30
+  # The image during training will be randomly rotated +/- the below degrees. 10 was their benchmark 
+  degrees: 10
   # This will be overwritten automatically. It is the mean and std deviation of the RGB channels of your dataset
   normalization:
     N: 0
