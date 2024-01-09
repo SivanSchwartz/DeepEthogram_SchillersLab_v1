@@ -155,9 +155,11 @@ class Train():
         n_cpus = multiprocessing.cpu_count()
         cfg.compute.num_workers = n_cpus
         log = self.reset_logger()
-        
+ 
         cfg.feature_extractor.arch = self.args.arch_FE
         cfg.feature_extractor.n_flows = self.args.flow_max_FG # should be as flow generation 
+        print('-----------------------------------> THIS IS THE n_flows from parser: ', flush= True)
+        print(self.args.flow_max_FG, flush=True)
         cfg.feature_extractor.curriculum = self.args.curriculum_FE
         cfg.train.num_epochs = self.args.num_epochs_FE
         cfg.compute.batch_size = 8
@@ -212,7 +214,9 @@ def main():
     parser = argparse.ArgumentParser(description='get inputs from the user for hyperparm etc.')
     
     # start from other location
+    parser.add_argument('--NO_initialization', type = bool, default=False, help = 'Not a new project')
     parser.add_argument('--Exist_path', type = str, default= None, help = 'If the project already exist then take the path to it')
+    parser.add_argument('--Start_stage', type= str, default= None, help = 'Set the place to start the run: FGT, FET, FEI, ST, SI')
     
     # arguments from the user
     parser.add_argument('--labeled_data_path', type=str, default= '/home/sivan.s/DeepEthogramProject/deepethogram/small_dataset_deabug/',
@@ -259,13 +263,48 @@ def main():
                     save_proj_path,
                     backboneWeightspath)
     
-    trainer.initialization()
-    trainer.train_flow_generation()
-    trainer.tain_feature_extractor()
-    trainer.inference_feature_extractor()
-    trainer.train_sequence()
-    trainer.inference_sequence()
-    trainer.postprocessing()    
+    # start in a specific point
+    if args.NO_initialization:
+        trainer.project_path = args.Exist_path
+        if args.Start_stage == 'FGT':
+            trainer.train_flow_generation()
+            trainer.tain_feature_extractor()
+            trainer.inference_feature_extractor()
+            trainer.train_sequence()
+            trainer.inference_sequence()
+            trainer.postprocessing()  
+            
+        elif args.Start_stage == 'FET':
+            trainer.tain_feature_extractor()
+            trainer.inference_feature_extractor()
+            trainer.train_sequence()
+            trainer.inference_sequence()
+            trainer.postprocessing()  
+            
+        elif  args.Start_stage == 'FEI':
+            trainer.inference_feature_extractor()
+            trainer.train_sequence()
+            trainer.inference_sequence()
+            trainer.postprocessing()  
+                    
+        elif  args.Start_stage == 'ST':
+            trainer.train_sequence()
+            trainer.inference_sequence()
+            trainer.postprocessing()   
+            
+        elif args.Start_stage == 'SI':
+            trainer.inference_sequence()
+            trainer.postprocessing()   
+            
+    # full train and inference 
+    else:
+        trainer.initialization()
+        trainer.train_flow_generation()
+        trainer.tain_feature_extractor()
+        trainer.inference_feature_extractor()
+        trainer.train_sequence()
+        trainer.inference_sequence()
+        trainer.postprocessing()    
 
 if __name__ == '__main__':
     main()
