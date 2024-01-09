@@ -237,7 +237,7 @@ def main():
     
     # sequence parameters 
     parser.add_argument('--num_epochs_S', type=int, default= 100, help='the num of epochs')
-    parser.add_argument('--rnn_style_S', type=str, default= 'lstm', help='can be from these options: rnn, gru, lstm')
+    #parser.add_argument('--rnn_style_S', type=str, default= 'lstm', help='can be from these options: rnn, gru, lstm')
     
     args = parser.parse_args()
 
