@@ -520,7 +520,7 @@ def feature_extractor_inference(cfg: DictConfig):
 
     feature_extractor_weights = projects.get_weightfile_from_cfg(cfg, 'feature_extractor')
     assert os.path.isfile(feature_extractor_weights)
-    run_files = utils.get_run_files_from_weights(feature_extractor_weights)
+    run_files = utils.get_run_files_from_weights(feature_extractor_weights) # issue with other models 
     if cfg.inference.use_loaded_model_cfg:
         loaded_config_file = run_files['config_file']
         loaded_cfg = OmegaConf.load(loaded_config_file)

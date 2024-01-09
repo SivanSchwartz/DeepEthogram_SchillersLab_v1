@@ -68,7 +68,7 @@ def creatnewproject(data_path, project_name, behaviors):
     return project_config
 
 if __name__ == '__main__':
-    new_project = True
+    new_project = False
     if new_project:
         project_path = r'H:\Models_deepEthogram\\'
         behaviors = ['background', 
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
 
 
-    flow_generator = True 
+    flow_generator = False 
     if flow_generator:
         # 1 stage: flow generator 
         #project_path = r'H:\Models_deepEthogram\23_05_18_HR_tuft_control_deepethogram'
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     train_FE = True
     if train_FE:
         # stage 2: feature extractor 
-        #project_path = r'H:\Models_deepEthogram\Test_runnerResults_deepethogram_withTheMissingLabels'
+        project_path = r'H:\Models_deepEthogram\CT99_23_06_09_HR_tuft_control_deepethogram'
         preset = 'deg_f'
         cfg = configuration.make_feature_extractor_train_cfg(project_path, preset=preset)
         print(OmegaConf.to_yaml(cfg))
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     infer_FE = True
     if infer_FE:
         # stage2 inference 
-        #project_path = r'H:\Models_deepEthogram\Test_runnerResults_deepethogram_withTheMissingLabels'
+        project_path = r'H:\Models_deepEthogram\CT99_23_06_09_HR_tuft_control_deepethogram_ORIGINAL'
         preset = 'deg_f'
         cfg = configuration.make_feature_extractor_inference_cfg(project_path=project_path, preset=preset)
         print(OmegaConf.to_yaml(cfg))

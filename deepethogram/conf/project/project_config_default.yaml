@@ -22,7 +22,7 @@ augs:
   random_resize: false
   resize:
   - 224
-  - 224 #450 this is the right way .. or, to maintain the aspect ratio.. 
+  - 224 # 450 this is the right way .. or, to maintain the aspect ratio..
 compute:
   batch_size: 32
   distributed: false

@@ -839,6 +839,11 @@ def get_run_files_from_weights(weightfile: Union[str, os.PathLike], metrics_pref
         config_file: path to config file
         metrics_file: path to metrics file
     """
+    print('---------------------------------->This is the weightfile: ', flush= True)
+    print(weightfile, flush= True)
+    print(os.path.dirname(weightfile), flush= True)
+    
+    
     loaded_config_file = os.path.join(os.path.dirname(weightfile), 'config.yaml')
     if not os.path.isfile(loaded_config_file):
         # weight file should be at most one-subdirectory-down from rundir
