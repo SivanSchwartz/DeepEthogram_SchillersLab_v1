@@ -113,7 +113,7 @@ class Train():
 
     # TRAIN FLOW GENERATOR
     def train_flow_generation(self):
-        preset = 'deg_m' # type of model -> deg_f, deg_m, deg_s
+        preset = 'deg_f' # type of model -> deg_f, deg_m, deg_s
         cfg = configuration.make_flow_generator_train_cfg(self.project_path, preset = preset) 
                                                          
         print(OmegaConf.to_yaml(cfg))
@@ -145,7 +145,7 @@ class Train():
     
     # TRAIN FEATURE EXTRACTOR 
     def tain_feature_extractor(self):
-        preset = 'deg_m' # type of model -> deg_f, deg_m, deg_s
+        preset = 'deg_f' # type of model -> deg_f, deg_m, deg_s
         cfg = configuration.make_feature_extractor_train_cfg(self.project_path,
                                                              preset=preset)
         print(OmegaConf.to_yaml(cfg))
@@ -168,7 +168,7 @@ class Train():
 
     # INFERENCE FEATURE EXTRACTOR 
     def inference_feature_extractor(self):
-        preset = 'deg_m'
+        preset = 'deg_f'
         cfg = configuration.make_feature_extractor_inference_cfg(project_path=self.project_path, preset=preset)
         print(OmegaConf.to_yaml(cfg))
 
