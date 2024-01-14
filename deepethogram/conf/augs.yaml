@@ -37,7 +37,7 @@ augs:
   # upside down. By contrast, an animal walking on a treadmill will never appear upside-down, so it should be set to 0.
   UD: 0.0
   # The image during training will be randomly rotated +/- the below degrees. 10 was their benchmark 
-  degrees: 10
+  degrees: 30
   # This will be overwritten automatically. It is the mean and std deviation of the RGB channels of your dataset
   normalization:
     N: 0
