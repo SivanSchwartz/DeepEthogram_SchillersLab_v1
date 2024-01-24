@@ -5,6 +5,8 @@ import os
 import pprint
 import random
 import warnings
+import yaml
+import shutil 
 from functools import partial
 from typing import Union, Tuple
 
@@ -823,7 +825,8 @@ def get_video_datasets(datadir: Union[str, os.PathLike],
                        flow_style: str = 'linear',
                        valid_splits_only: bool = True,
                        conv_mode: str = '2d',
-                       mean_by_channels: list = [0.5, 0.5, 0.5]):
+                       mean_by_channels: list = [0.5, 0.5, 0.5],
+                       use_split_deafualt: bool = True):
     """ Gets dataloaders for video-based datasets.
 
     Parameters
@@ -902,14 +905,26 @@ def get_video_datasets(datadir: Union[str, os.PathLike],
         error_message += 'You need at least 3 videos in your project to begin training.'
         raise ValueError(error_message)
 
-    # returns a dictionary, where each split in ['train', 'val', 'test'] as a list of keys
-    # each key corresponds to a unique directory, and has
-    split_dictionary = get_split_from_records(records, datadir, splitfile, supervised, reload_split, valid_splits_only,
-                                              train_val_test)
-    # it's possible that your split has records that are invalid for the current task.
-    # e.g.: you've added a video, but not labeled it yet. In that case, it will already be in your split, but it is
-    # invalid for current purposes, because it has no label. Therefore, we want to remove it from the current split
-    split_dictionary = remove_invalid_records_from_split_dictionary(split_dictionary, records)
+    # I should save the .ymal!
+    if use_split_deafualt:
+        split_source = r'/home/sivan.s/Models_results_deepEto/split.yaml'
+        with open(split_source, 'r') as file:
+            split_dictionary = yaml.safe_load(file)
+        # save the dict to the folder if not exist
+        copied_ymal_file_path = os.path.join(os.getcwd().split('models')[0], 'DATA', 'split.yaml')
+        if not os.path.exists(copied_ymal_file_path):
+            print("File exists.")
+            shutil.copy(split_source, copied_ymal_file_path)
+        
+    else:
+        # returns a dictionary, where each split in ['train', 'val', 'test'] as a list of keys
+        # each key corresponds to a unique directory, and has
+        split_dictionary = get_split_from_records(records, datadir, splitfile, supervised, reload_split, valid_splits_only,
+                                                train_val_test)
+        # it's possible that your split has records that are invalid for the current task.
+        # e.g.: you've added a video, but not labeled it yet. In that case, it will already be in your split, but it is
+        # invalid for current purposes, because it has no label. Therefore, we want to remove it from the current split
+        split_dictionary = remove_invalid_records_from_split_dictionary(split_dictionary, records)
 
     datasets = {}
     for i, split in enumerate(['train', 'val', 'test']):
@@ -1130,7 +1145,7 @@ def get_sequence_datasets(datadir: Union[str, os.PathLike],
     return datasets, data_info
 
 
-def get_datasets_from_cfg(cfg: DictConfig, model_type: str, input_images: int = 1) -> Tuple[dict, dict]:
+def get_datasets_from_cfg(cfg: DictConfig, model_type: str, input_images: int = 1, old_split: bool = True) -> Tuple[dict, dict]:
     """ Returns dataloader objects using a Hydra-generated configuration dictionary.
 
     This is the main entry point for getting dataloaders from the command line. it will return the correct dataloader
@@ -1157,6 +1172,8 @@ def get_datasets_from_cfg(cfg: DictConfig, model_type: str, input_images: int = 
         information see the specific dataloader of the model you're training, e.g. get_video_dataloaders
     """
     #
+    print('-------------------------------------------------> THIS CODE USE THE SPLIT OF PREVIUS RUNS !!!', flush=True)
+    print('The function is datasets line 1168')
     supervised = model_type != 'flow_generator'
     if model_type == 'feature_extractor' or model_type == 'flow_generator':
         arch = cfg[model_type].arch
@@ -1183,7 +1200,8 @@ def get_datasets_from_cfg(cfg: DictConfig, model_type: str, input_images: int = 
                                                 reduce=reduce,
                                                 valid_splits_only=True,
                                                 conv_mode=mode,
-                                                mean_by_channels=cfg.augs.normalization.mean)
+                                                mean_by_channels=cfg.augs.normalization.mean,
+                                                use_split_deafualt= old_split)
 
     elif model_type == 'sequence':
         if cfg.feature_extractor.final_activation == 'softmax':
